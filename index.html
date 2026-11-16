@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ school }} | Classroom Management</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: Arial, sans-serif; background:#f4f6fa; color:#202938; }
+    .wrap { max-width:1050px; margin: auto; padding:22px 15px 40px; }
+    header { background:#243b53; color:white; padding:24px; border-radius:16px; }
+    header h1 { margin:0 0 8px; font-size:25px; }
+    header p { margin:5px 0; color:#e5edf5; }
+    .cards { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:18px 0; }
+    .card { background:white; padding:17px; border-radius:13px; box-shadow:0 2px 9px #1c2b3a0d; }
+    .label { color:#66788a; font-size:13px; }
+    .value { font-size:27px; font-weight:700; margin-top:7px; }
+    .green { color:#16834a; } .red { color:#c0392b; }
+    .section { background:white; border-radius:14px; padding:18px; margin-top:16px; box-shadow:0 2px 9px #1c2b3a0d; }
+    h2 { font-size:19px; margin:0 0 14px; }
+    .hint { color:#66788a; font-size:13px; margin:0 0 14px; }
+    .table-wrap { overflow-x:auto; }
+    table { width:100%; border-collapse:collapse; min-width:620px; }
+    th,td { text-align:left; padding:11px 9px; border-bottom:1px solid #e8edf2; font-size:14px; }
+    th { color:#536579; background:#f8fafc; }
+    input,select { padding:9px; border:1px solid #ccd6e0; border-radius:7px; font-size:14px; max-width:100%; }
+    input[type=number] { width:85px; }
+    .pill { display:inline-block; padding:5px 9px; border-radius:20px; font-size:12px; font-weight:bold; }
+    .a { background:#e5f6ec; color:#137342; } .b { background:#fdebea; color:#b83227; }
+    button { background:#2463a6; color:white; border:0; padding:12px 18px; border-radius:8px; font-weight:bold; font-size:15px; cursor:pointer; margin-top:15px; }
+    button:hover { background:#174b83; }
+    .notice { background:#e8f5ed; color:#17643a; padding:11px; border-radius:8px; margin:12px 0; }
+    .foot { color:#6b7785; font-size:12px; text-align:center; margin-top:22px; }
+    @media(max-width:600px) { .cards { grid-template-columns:repeat(2,1fr); } header h1 {font-size:21px;} .value {font-size:24px;} }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>{{ school }}</h1>
+    <p><strong>{{ class_name }}</strong> · Classroom Attendance & Result Management</p>
+    <p>Teacher: {{ teacher }}</p>
+  </header>
+
+  {% if message %}<div class="notice">{{ message }}</div>{% endif %}
+
+  <div class="cards">
+    <div class="card"><div class="label">Total Students</div><div class="value">{{ summary.total }}</div></div>
+    <div class="card"><div class="label">Present</div><div class="value green">{{ summary.present }}</div></div>
+    <div class="card"><div class="label">Absent</div><div class="value red">{{ summary.absent }}</div></div>
+    <div class="card"><div class="label">Group A · Good</div><div class="value green">{{ summary.group_a }}</div></div>
+    <div class="card"><div class="label">Group B · Weak</div><div class="value red">{{ summary.group_b }}</div></div>
+    <div class="card"><div class="label">Average Marks</div><div class="value">{{ summary.average }}</div></div>
+  </div>
+
+  <section class="section">
+    <h2>Student Attendance & Class Test Results</h2>
+    <p class="hint">You can change attendance and marks, then select Update Report. Marks must be between 0 and 100.</p>
+    <form method="POST">
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>Student</th><th>Attendance</th><th>Marks / 100</th><th>Group</th></tr></thead>
+        <tbody>
+        {% for student in students %}
+          <tr>
+            <td>
+              {{ student.name }}
+              <input type="hidden" name="name" value="{{ student.name }}">
+            </td>
+            <td>
+              <select name="attendance">
+                <option value="Present" {% if student.attendance == "Present" %}selected{% endif %}>Present</option>
+                <option value="Absent" {% if student.attendance == "Absent" %}selected{% endif %}>Absent</option>
+              </select>
+            </td>
+            <td><input type="number" name="marks" min="0" max="100" value="{{ student.marks }}" required></td>
+            <td>
+              {% if student.marks >= pass_mark %}
+                <span class="pill a">A · Good</span>
+              {% else %}
+                <span class="pill b">B · Weak</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      </div>
+      <button type="submit">Update Attendance & Results</button>
+    </form>
+  </section>
+
+  <section class="section">
+    <h2>Classification Rules</h2>
+    <p><span class="pill a">Group A · Good Student</span> Marks from {{ pass_mark }} to 100.</p>
+    <p><span class="pill b">Group B · Weak Student</span> Marks below {{ pass_mark }}.</p>
+    <p class="hint">Attendance and academic group are calculated separately. An absent student's entered test mark is still classified by the same rule.</p>
+  </section>
+  <div class="foot">ABC Model School · Classroom Management System · Built with Python & Flask</div>
+</div>
+</body>
+</html>
